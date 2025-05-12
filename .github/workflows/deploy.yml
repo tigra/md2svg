@@ -33,6 +33,13 @@ jobs:
       
       - name: Build
         run: npm run build
+
+      - name: Ensure image is in dist directory
+        run: |
+          echo "Copying md2svg.png to dist directory..."
+          cp -f md2svg.png dist/
+          echo "Contents of dist directory with image:"
+          ls -la dist/
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
