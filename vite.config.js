@@ -3,13 +3,13 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   // Base path for production build - will be placed under /md2svg/
   base: '/md2svg/',
-
+  
   // Development server config
   server: {
     port: 3000,
     open: true,
   },
-
+  
   // Build options
   build: {
     outDir: 'dist',
@@ -21,10 +21,5 @@ export default defineConfig({
         comments: true,
       },
     },
-    // Ensure all public files are included in the build
-    copyPublicDir: true,
   },
-
-  // Public directory handling
-  publicDir: 'public',
 });

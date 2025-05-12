@@ -586,27 +586,11 @@ button:hover {
 
 /* Footer */
 footer {
-    min-height: 30px;
+    height: 30px;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     color: #f0f0f0;
     text-align: center;
     font-size: 0.8rem;
-    gap: 20px;
-}
-
-.github-link a {
-    color: #f0f0f0;
-    text-decoration: none;
-    border: 1px solid #f0f0f0;
-    padding: 2px 8px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.github-link a:hover {
-    background-color: #f0f0f0;
-    color: #2c3e50;
 }

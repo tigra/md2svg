@@ -19,7 +19,7 @@ Built primarily to demonstrate different methods for Markdown -> SVG conversion.
 - Responsive layout that works on various screen sizes
 
 ## Screenshots
-![md2svg.png](public/md2svg.png)
+![md2svg.png](md2svg.png)
 
 ## Usage
 
@@ -157,8 +157,6 @@ This project is configured for manual deployment to GitHub Pages through GitHub 
 This manual approach gives you control over when to deploy new versions.
 
 After deployment, the application will be available at: https://yourusername.github.io/md2svg/
-
-> **Note:** The repository includes a screenshot image (`md2svg.png`) in the public directory that will automatically be deployed to GitHub Pages.
 
 ## Future Enhancement Areas
 
