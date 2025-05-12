@@ -109,22 +109,54 @@ Each module uses a factory function pattern, allowing for:
 - Smart positioning based on available screen space
 - Tooltips remain visible even when parent containers have overflow:hidden
 
-## Server Requirement Note
+## Development
 
-For the dom-to-svg Module method to work, the page must be served via a web server due to ES module restrictions. You can use:
+### Local Development Server
+
+This project uses Vite for development and building. To start the development server:
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-Then access the page at http://localhost:8000 (or whatever port your server uses).
+This will start a development server at http://localhost:3000 with hot module replacement.
 
-## Development
+### Building for Production
 
-To modify the application:
-1. Make changes to the HTML, CSS, or JavaScript files
-2. Refresh the page to see your changes
-3. No build step required - this is a pure client-side application
+To build the application for production:
+
+```bash
+# Build the project
+npm run build
+```
+
+This will create a `dist` directory with the bundled application.
+
+### Preview Production Build
+
+To preview the production build locally:
+
+```bash
+# Preview the production build
+npm run preview
+```
+
+### GitHub Pages Deployment
+
+This project is configured for manual deployment to GitHub Pages through GitHub Actions:
+
+1. Go to your GitHub repository
+2. Navigate to the "Actions" tab
+3. Select the "Deploy to GitHub Pages" workflow
+4. Click "Run workflow" and select the branch you want to deploy
+
+This manual approach gives you control over when to deploy new versions.
+
+After deployment, the application will be available at: https://yourusername.github.io/md2svg/
 
 ## Future Enhancement Areas
 

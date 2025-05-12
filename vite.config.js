@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // Base path for production build
-  base: './',
+  // Base path for production build - will be placed under /md2svg/
+  base: '/md2svg/',
   
   // Development server config
   server: {
