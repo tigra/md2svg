@@ -31,14 +31,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Setup public directory for build
+        run: |
+          # Create public directory and copy image to it before build
+          echo "Setting up public directory..."
+          mkdir -p public
+          cp -f md2svg.png public/
+          echo "Contents of public directory before build:"
+          ls -la public/
+
       - name: Build
         run: npm run build
 
-      - name: Ensure image is in dist directory
+      - name: Ensure images are properly deployed
         run: |
-          echo "Copying md2svg.png to dist directory..."
-          cp -f md2svg.png dist/
-          echo "Contents of dist directory with image:"
+          # Double-check if image exists in dist
+          if [ ! -f dist/md2svg.png ]; then
+            echo "Image not found in dist, copying directly..."
+            cp -f md2svg.png dist/
+          fi
+
+          # Create a test HTML file to verify image access
+          echo '<html><body><h1>Image Test</h1><p>Image should appear below:</p><img src="md2svg.png" alt="md2svg screenshot"><p>If image is not visible, check path issues.</p></body></html>' > dist/image-test.html
+
+          echo "Contents of dist directory after build and fixes:"
           ls -la dist/
       
       - name: Setup Pages
