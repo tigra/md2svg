@@ -19,7 +19,7 @@ Built primarily to demonstrate different methods for Markdown -> SVG conversion.
 - Responsive layout that works on various screen sizes
 
 ## Screenshots
-(TODO: place screenshots here)
+![md2svg.png](md2svg.png)
 
 ## Usage
 
