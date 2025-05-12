@@ -32,7 +32,11 @@ jobs:
         run: npm ci
       
       - name: Build
-        run: npm run build
+        run: |
+          echo "Building with Vite using CommonJS config..."
+          npm run build:cjs
+          echo "Content of dist directory:"
+          ls -la dist/
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
