@@ -476,8 +476,9 @@ main {
     flex: 1;
     overflow: auto;
     max-width: 400px;
-    width: 400px;
+    width: auto; /* Changed to auto for dynamic width */
     margin: 0 auto; /* Center the preview */
+    display: inline-block; /* Allow container to shrink to content */
 }
 
 #html-preview h1 {
@@ -542,7 +543,7 @@ main {
     overflow: auto;
     box-sizing: border-box;
     max-width: 400px;
-    width: 400px;
+    width: auto; /* Changed to auto for dynamic width */
     margin: 0 auto; /* Center the preview */
 }
 

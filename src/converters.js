@@ -2,7 +2,7 @@
 // This file contains the core conversion methods for the md2svg application
 
 // Configuration constants
-const SVG_WIDTH = 400; // Default SVG width used across all methods
+const SVG_MAX_WIDTH = 400; // Maximum SVG width used across all methods
 
 /**
  * Create a Converters object with injected dependencies
@@ -42,7 +42,14 @@ export const createConverters = (deps) => {
             const tokens = marked.lexer(markdownContent);
             
             // SVG dimensions and settings
-            const width = SVG_WIDTH;
+            // Start with a relatively small width to determine natural content width
+            let dynamicWidth = 200;
+            // For very short content, use narrower width
+            if (markdownContent.length < 100) {
+                dynamicWidth = Math.max(markdownContent.length * 2, 100);
+            }
+            // Cap at maximum allowed width
+            const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
             const height = 600; // Initial height, will be dynamically adjusted based on content
             const padding = 20;
             const lineHeight = 24;
@@ -157,7 +164,20 @@ export const createConverters = (deps) => {
          * @returns {string} - SVG markup as a string
          */
         htmlToForeignObjectSVG(htmlContent) {
-            const width = SVG_WIDTH;
+            // Determine content width dynamically based on content length
+            let dynamicWidth = 200;
+
+            // For very short content, use narrower width
+            if (htmlContent.length < 100) {
+                dynamicWidth = Math.max(htmlContent.length * 2, 100);
+            } else if (htmlContent.length < 500) {
+                dynamicWidth = 300;
+            } else {
+                dynamicWidth = SVG_MAX_WIDTH;
+            }
+
+            // Cap at maximum allowed width
+            const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
 
             // Create a temporary div to measure the content height
             const tempDiv = document.createElement('div');
@@ -202,13 +222,29 @@ export const createConverters = (deps) => {
                 // Create a styled container for conversion
                 const conversionContainer = document.createElement('div');
                 conversionContainer.innerHTML = htmlElement.innerHTML;
-                
+
+                // Determine content width dynamically based on content length
+                let dynamicWidth = 200;
+                const contentLength = htmlElement.innerHTML.length;
+
+                // For very short content, use narrower width
+                if (contentLength < 100) {
+                    dynamicWidth = Math.max(contentLength * 2, 100);
+                } else if (contentLength < 500) {
+                    dynamicWidth = 300;
+                } else {
+                    dynamicWidth = SVG_MAX_WIDTH;
+                }
+
+                // Cap at maximum allowed width
+                const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
+
                 // Apply styling to the container
                 Object.assign(conversionContainer.style, {
                     fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
                     color: '#333',
                     padding: '20px',
-                    width: `${SVG_WIDTH}px`,
+                    width: `${width}px`,
                     maxWidth: '100%',
                     background: 'white',
                     position: 'absolute',
@@ -224,7 +260,7 @@ export const createConverters = (deps) => {
                     backgroundColor: 'white',
                     scale: 2, // Higher resolution
                     logging: false,
-                    width: SVG_WIDTH, // Set explicit width to ensure proper sizing
+                    width: width, // Use the dynamic width we determined
                     height: null, // Let height be determined by content
                     onclone: (clonedDoc) => {
                         // Additional styling can be applied to the cloned document if needed
@@ -236,18 +272,18 @@ export const createConverters = (deps) => {
                 
                 // Convert canvas to SVG image embedding
                 const dataURL = canvas.toDataURL('image/png');
-                const width = canvas.width;
-                const height = canvas.height;
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
                 
                 // Create SVG with embedded image - width and height are now based on actual canvas dimensions
-                const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-                    <image width="${width}" height="${height}" xlink:href="${dataURL}" />
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${canvasWidth}" height="${canvasHeight}" viewBox="0 0 ${canvasWidth} ${canvasHeight}">
+                    <image width="${canvasWidth}" height="${canvasHeight}" xlink:href="${dataURL}" />
                 </svg>`;
                 
                 return svg;
             } catch (error) {
                 console.error('Error in Canvas to SVG conversion:', error);
-                return `<svg xmlns="http://www.w3.org/2000/svg" width="${SVG_WIDTH}" height="200" viewBox="0 0 ${SVG_WIDTH} 200">
+                return `<svg xmlns="http://www.w3.org/2000/svg" width="${SVG_MAX_WIDTH}" height="200" viewBox="0 0 ${SVG_MAX_WIDTH} 200">
                     <text x="50" y="50" fill="red">Error: ${error.message}</text>
                     <text x="50" y="80" fill="red">Try a different conversion method or check console for details.</text>
                 </svg>`;
@@ -264,13 +300,29 @@ export const createConverters = (deps) => {
                 // Create a styled container for conversion
                 const conversionContainer = document.createElement('div');
                 conversionContainer.innerHTML = htmlElement.innerHTML;
-                
+
+                // Determine content width dynamically based on content length
+                let dynamicWidth = 200;
+                const contentLength = htmlElement.innerHTML.length;
+
+                // For very short content, use narrower width
+                if (contentLength < 100) {
+                    dynamicWidth = Math.max(contentLength * 2, 100);
+                } else if (contentLength < 500) {
+                    dynamicWidth = 300;
+                } else {
+                    dynamicWidth = SVG_MAX_WIDTH;
+                }
+
+                // Cap at maximum allowed width
+                const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
+
                 // Apply styling to the container
                 Object.assign(conversionContainer.style, {
                     fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
                     color: '#333',
                     padding: '20px',
-                    width: `${SVG_WIDTH}px`,
+                    width: `${width}px`,
                     maxWidth: '100%',
                     background: 'white',
                     position: 'absolute',
@@ -294,8 +346,8 @@ export const createConverters = (deps) => {
 
                 // Set fixed attributes on the SVG to ensure proper display
                 if (svgDocument && svgDocument.documentElement) {
-                    // Set width to our standard width
-                    svgDocument.documentElement.setAttribute('width', SVG_WIDTH);
+                    // Set width to our dynamic width
+                    svgDocument.documentElement.setAttribute('width', width);
 
                     // Remove any overflow restrictions
                     svgDocument.documentElement.style.overflow = 'visible';
@@ -314,8 +366,9 @@ export const createConverters = (deps) => {
                 return svgString;
             } catch (error) {
                 console.error('Error in dom-to-svg module conversion:', error);
-                // Create an error SVG with the standard width
-                return `<svg xmlns="http://www.w3.org/2000/svg" width="${SVG_WIDTH}" height="200" viewBox="0 0 ${SVG_WIDTH} ${contentHeight}">
+                // Create an error SVG with the dynamic width (use max width for error message)
+                const errorHeight = 200; // Fixed height for error message
+                return `<svg xmlns="http://www.w3.org/2000/svg" width="${SVG_MAX_WIDTH}" height="${errorHeight}" viewBox="0 0 ${SVG_MAX_WIDTH} ${errorHeight}">
                     <text x="50" y="50" fill="red">Error: ${error.message}</text>
                     <text x="50" y="80" fill="red">This method requires serving the page via a web server due to ES module restrictions.</text>
                 </svg>`;
