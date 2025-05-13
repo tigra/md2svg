@@ -179,31 +179,33 @@ export const createConverters = (deps) => {
             // Cap at maximum allowed width
             const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
 
-            // Create a temporary div to measure the content height
+            // Create a temporary div with exact styling to measure the content height
             const tempDiv = document.createElement('div');
             tempDiv.style.width = `${width}px`;
             tempDiv.style.position = 'absolute';
             tempDiv.style.left = '-9999px';
             tempDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
-            tempDiv.style.padding = '20px';
+            tempDiv.style.padding = '10px'; // Add standard padding
+            tempDiv.style.margin = '0';
             tempDiv.style.boxSizing = 'border-box';
+            tempDiv.style.display = 'inline-block'; // Allow to shrink to content
             tempDiv.innerHTML = htmlContent;
 
             // Add to DOM temporarily to get dimensions
             document.body.appendChild(tempDiv);
 
             // Get the actual height
-            const contentHeight = tempDiv.offsetHeight;
+            const contentHeight = tempDiv.scrollHeight;
 
             // Remove the temporary element
             document.body.removeChild(tempDiv);
 
-            // Add some padding to ensure all content is visible
-            const height = contentHeight + 40;
+            // Use exact content height
+            const height = contentHeight;
 
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-                <foreignObject width="100%" height="100%" x="0" y="0">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; padding: 20px; background-color: white; width: 100%; height: 100%;">
+                <foreignObject width="${width}" height="${height}" x="0" y="0">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; padding: 10px; margin: 0; background-color: white; width: ${width}px; height: ${height}px; box-sizing: border-box;">
                         ${htmlContent}
                     </div>
                 </foreignObject>
@@ -243,7 +245,7 @@ export const createConverters = (deps) => {
                 Object.assign(conversionContainer.style, {
                     fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
                     color: '#333',
-                    padding: '20px',
+                    padding: '10px', // Same padding as HTML preview
                     width: `${width}px`,
                     maxWidth: '100%',
                     background: 'white',
@@ -321,7 +323,7 @@ export const createConverters = (deps) => {
                 Object.assign(conversionContainer.style, {
                     fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
                     color: '#333',
-                    padding: '20px',
+                    padding: '10px', // Same padding as HTML preview
                     width: `${width}px`,
                     maxWidth: '100%',
                     background: 'white',

@@ -195,7 +195,7 @@ main {
     right: 0;
     height: 50%;
     width: auto;
-    overflow: hidden;
+    overflow: auto; /* Changed from hidden to auto */
     box-sizing: border-box;
 }
 
@@ -205,7 +205,7 @@ main {
     right: 0;
     height: 50%;
     width: auto;
-    overflow: hidden;
+    overflow: auto; /* Changed from hidden to auto */
     box-sizing: border-box;
     /* bottom will be positioned by resizer */
 }
@@ -473,12 +473,16 @@ main {
 
 /* HTML Preview styling */
 #html-preview {
-    flex: 1;
-    overflow: auto;
+    flex: 0 0 auto; /* Don't stretch, use actual content size */
+    overflow: visible;
     max-width: 400px;
-    width: auto; /* Changed to auto for dynamic width */
-    margin: 0 auto; /* Center the preview */
+    width: auto; /* Will be set dynamically in JS */
+    margin: 0; /* Remove centering */
     display: inline-block; /* Allow container to shrink to content */
+    border: 1px solid #ddd; /* Light border to see boundaries */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Match SVG font */
+    padding: 0; /* No default padding */
+    box-sizing: border-box;
 }
 
 #html-preview h1 {
@@ -532,27 +536,26 @@ main {
 
 /* SVG output section */
 #svg-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Changed from center to show top content */
+    flex: 0 0 auto; /* Don't stretch, use actual content size */
+    display: inline-block; /* Allow container to shrink to content */
     background-color: white;
     border: 1px dashed #ccc;
     border-radius: 4px;
     padding: 10px;
-    overflow: auto;
+    overflow: visible;
     box-sizing: border-box;
     max-width: 400px;
     width: auto; /* Changed to auto for dynamic width */
-    margin: 0 auto; /* Center the preview */
+    margin: 0; /* Remove centering */
 }
 
 /* Ensure SVG content is fully visible */
 #svg-container svg {
-    width: 100%;
+    width: auto; /* Use natural width */
     height: auto;
     overflow: visible;
     display: block;
+    border: 1px solid #f0f0f0; /* Very light border to see SVG boundaries */
 }
 
 /* Buttons */
