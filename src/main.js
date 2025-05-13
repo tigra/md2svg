@@ -93,6 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add the SVG code to the textarea
             svgCode.value = svgString;
 
+            // Make sure the SVG container scrolls to the top to show the beginning of content
+            svgContainer.scrollTop = 0;
+
             // Enable the download button
             downloadButton.disabled = false;
         } catch (error) {

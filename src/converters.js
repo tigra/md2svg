@@ -1,6 +1,9 @@
 // Converters for Markdown to SVG
 // This file contains the core conversion methods for the md2svg application
 
+// Configuration constants
+const SVG_WIDTH = 400; // Default SVG width used across all methods
+
 /**
  * Create a Converters object with injected dependencies
  * @param {Object} deps - Dependencies object containing required libraries
@@ -39,8 +42,8 @@ export const createConverters = (deps) => {
             const tokens = marked.lexer(markdownContent);
             
             // SVG dimensions and settings
-            const width = 800;
-            const height = 1200; // Start with a height, will be adjusted
+            const width = SVG_WIDTH;
+            const height = 600; // Initial height, will be dynamically adjusted based on content
             const padding = 20;
             const lineHeight = 24;
             const fontFamily = 'Arial, Helvetica, sans-serif';
@@ -154,9 +157,30 @@ export const createConverters = (deps) => {
          * @returns {string} - SVG markup as a string
          */
         htmlToForeignObjectSVG(htmlContent) {
-            const width = 800;
-            const height = 600;
-            
+            const width = SVG_WIDTH;
+
+            // Create a temporary div to measure the content height
+            const tempDiv = document.createElement('div');
+            tempDiv.style.width = `${width}px`;
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+            tempDiv.style.padding = '20px';
+            tempDiv.style.boxSizing = 'border-box';
+            tempDiv.innerHTML = htmlContent;
+
+            // Add to DOM temporarily to get dimensions
+            document.body.appendChild(tempDiv);
+
+            // Get the actual height
+            const contentHeight = tempDiv.offsetHeight;
+
+            // Remove the temporary element
+            document.body.removeChild(tempDiv);
+
+            // Add some padding to ensure all content is visible
+            const height = contentHeight + 40;
+
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
                 <foreignObject width="100%" height="100%" x="0" y="0">
                     <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; padding: 20px; background-color: white; width: 100%; height: 100%;">
@@ -164,7 +188,7 @@ export const createConverters = (deps) => {
                     </div>
                 </foreignObject>
             </svg>`;
-            
+
             return svg;
         },
         
@@ -184,7 +208,7 @@ export const createConverters = (deps) => {
                     fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
                     color: '#333',
                     padding: '20px',
-                    width: '800px',
+                    width: `${SVG_WIDTH}px`,
                     maxWidth: '100%',
                     background: 'white',
                     position: 'absolute',
@@ -200,6 +224,8 @@ export const createConverters = (deps) => {
                     backgroundColor: 'white',
                     scale: 2, // Higher resolution
                     logging: false,
+                    width: SVG_WIDTH, // Set explicit width to ensure proper sizing
+                    height: null, // Let height be determined by content
                     onclone: (clonedDoc) => {
                         // Additional styling can be applied to the cloned document if needed
                     }
@@ -213,7 +239,7 @@ export const createConverters = (deps) => {
                 const width = canvas.width;
                 const height = canvas.height;
                 
-                // Create SVG with embedded image
+                // Create SVG with embedded image - width and height are now based on actual canvas dimensions
                 const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
                     <image width="${width}" height="${height}" xlink:href="${dataURL}" />
                 </svg>`;
@@ -221,7 +247,7 @@ export const createConverters = (deps) => {
                 return svg;
             } catch (error) {
                 console.error('Error in Canvas to SVG conversion:', error);
-                return `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+                return `<svg xmlns="http://www.w3.org/2000/svg" width="${SVG_WIDTH}" height="200" viewBox="0 0 ${SVG_WIDTH} 200">
                     <text x="50" y="50" fill="red">Error: ${error.message}</text>
                     <text x="50" y="80" fill="red">Try a different conversion method or check console for details.</text>
                 </svg>`;
@@ -244,7 +270,7 @@ export const createConverters = (deps) => {
                     fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
                     color: '#333',
                     padding: '20px',
-                    width: '800px',
+                    width: `${SVG_WIDTH}px`,
                     maxWidth: '100%',
                     background: 'white',
                     position: 'absolute',
@@ -260,9 +286,24 @@ export const createConverters = (deps) => {
                     throw new Error('dom-to-svg module not loaded properly. This method requires a server to work correctly due to ES module loading restrictions.');
                 }
                 
+                // Get the height of the content
+                const contentHeight = conversionContainer.offsetHeight;
+
                 // Use dom-to-svg to convert to SVG
                 const svgDocument = domToSvgModule.elementToSVG(conversionContainer);
-                
+
+                // Set fixed attributes on the SVG to ensure proper display
+                if (svgDocument && svgDocument.documentElement) {
+                    // Set width to our standard width
+                    svgDocument.documentElement.setAttribute('width', SVG_WIDTH);
+
+                    // Remove any overflow restrictions
+                    svgDocument.documentElement.style.overflow = 'visible';
+
+                    // Note: We're not modifying the viewBox as it's correctly capturing the content
+                    // even with negative coordinates. This ensures all content is preserved.
+                }
+
                 // Convert to string
                 const serializer = new XMLSerializer();
                 const svgString = serializer.serializeToString(svgDocument);
@@ -273,7 +314,8 @@ export const createConverters = (deps) => {
                 return svgString;
             } catch (error) {
                 console.error('Error in dom-to-svg module conversion:', error);
-                return `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+                // Create an error SVG with the standard width
+                return `<svg xmlns="http://www.w3.org/2000/svg" width="${SVG_WIDTH}" height="200" viewBox="0 0 ${SVG_WIDTH} ${contentHeight}">
                     <text x="50" y="50" fill="red">Error: ${error.message}</text>
                     <text x="50" y="80" fill="red">This method requires serving the page via a web server due to ES module restrictions.</text>
                 </svg>`;

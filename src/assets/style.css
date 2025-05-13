@@ -475,7 +475,9 @@ main {
 #html-preview {
     flex: 1;
     overflow: auto;
-    max-width: 100%;
+    max-width: 400px;
+    width: 400px;
+    margin: 0 auto; /* Center the preview */
 }
 
 #html-preview h1 {
@@ -532,14 +534,24 @@ main {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Changed from center to show top content */
     background-color: white;
     border: 1px dashed #ccc;
     border-radius: 4px;
     padding: 10px;
     overflow: auto;
     box-sizing: border-box;
-    max-width: 100%;
+    max-width: 400px;
+    width: 400px;
+    margin: 0 auto; /* Center the preview */
+}
+
+/* Ensure SVG content is fully visible */
+#svg-container svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    display: block;
 }
 
 /* Buttons */
