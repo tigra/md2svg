@@ -355,7 +355,7 @@ export const createConverters = (deps) => {
                 document.body.removeChild(measureDiv);
 
                 // Set a minimum width and cap at maximum
-                const width = Math.max(Math.min(naturalWidth, SVG_MAX_WIDTH), 100);
+                const width = Math.max(Math.min(naturalWidth, SVG_MAX_WIDTH), 40);
 
                 // Apply styling to the container
                 Object.assign(conversionContainer.style, {
