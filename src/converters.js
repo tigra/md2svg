@@ -40,16 +40,32 @@ export const createConverters = (deps) => {
         markdownToNativeSVG(markdownContent) {
             // Parse markdown content
             const tokens = marked.lexer(markdownContent);
-            
-            // SVG dimensions and settings
-            // Start with a relatively small width to determine natural content width
-            let dynamicWidth = 200;
-            // For very short content, use narrower width
-            if (markdownContent.length < 100) {
-                dynamicWidth = Math.max(markdownContent.length * 2, 100);
-            }
-            // Cap at maximum allowed width
-            const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
+
+            // First convert markdown to HTML to measure natural width
+            const htmlContent = this.markdownToHtml(markdownContent);
+
+            // Create a temporary div to measure the natural content width
+            const measureDiv = document.createElement('div');
+            measureDiv.style.position = 'absolute';
+            measureDiv.style.visibility = 'hidden';
+            measureDiv.style.fontFamily = 'Arial, Helvetica, sans-serif';
+            measureDiv.style.padding = '10px';
+            measureDiv.style.display = 'inline-block';
+            measureDiv.style.maxWidth = `${SVG_MAX_WIDTH}px`;
+            measureDiv.style.boxSizing = 'border-box';
+            measureDiv.innerHTML = htmlContent;
+
+            // Add to DOM to get accurate measurements
+            document.body.appendChild(measureDiv);
+
+            // Get natural width based on content
+            let naturalWidth = Math.ceil(measureDiv.getBoundingClientRect().width);
+
+            // Remove measure element
+            document.body.removeChild(measureDiv);
+
+            // Set a minimum width and cap at maximum
+            const width = Math.max(Math.min(naturalWidth, SVG_MAX_WIDTH), 100);
             const height = 600; // Initial height, will be dynamically adjusted based on content
             const padding = 20;
             const lineHeight = 24;
@@ -164,20 +180,28 @@ export const createConverters = (deps) => {
          * @returns {string} - SVG markup as a string
          */
         htmlToForeignObjectSVG(htmlContent) {
-            // Determine content width dynamically based on content length
-            let dynamicWidth = 200;
+            // Create a temporary div to measure the actual natural content width
+            const measureDiv = document.createElement('div');
+            measureDiv.style.position = 'absolute';
+            measureDiv.style.visibility = 'hidden';
+            measureDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+            measureDiv.style.padding = '10px';
+            measureDiv.style.display = 'inline-block';
+            measureDiv.style.maxWidth = `${SVG_MAX_WIDTH}px`;
+            measureDiv.style.boxSizing = 'border-box';
+            measureDiv.innerHTML = htmlContent;
 
-            // For very short content, use narrower width
-            if (htmlContent.length < 100) {
-                dynamicWidth = Math.max(htmlContent.length * 2, 100);
-            } else if (htmlContent.length < 500) {
-                dynamicWidth = 300;
-            } else {
-                dynamicWidth = SVG_MAX_WIDTH;
-            }
+            // Add to DOM to get accurate measurements
+            document.body.appendChild(measureDiv);
 
-            // Cap at maximum allowed width
-            const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
+            // Get natural width based on content
+            let naturalWidth = Math.ceil(measureDiv.getBoundingClientRect().width);
+
+            // Remove measure element
+            document.body.removeChild(measureDiv);
+
+            // Set a minimum width and cap at maximum
+            const width = Math.max(Math.min(naturalWidth, SVG_MAX_WIDTH), 100);
 
             // Create a temporary div with exact styling to measure the content height
             const tempDiv = document.createElement('div');
@@ -225,21 +249,28 @@ export const createConverters = (deps) => {
                 const conversionContainer = document.createElement('div');
                 conversionContainer.innerHTML = htmlElement.innerHTML;
 
-                // Determine content width dynamically based on content length
-                let dynamicWidth = 200;
-                const contentLength = htmlElement.innerHTML.length;
+                // Create a temporary div to measure the actual natural content width
+                const measureDiv = document.createElement('div');
+                measureDiv.style.position = 'absolute';
+                measureDiv.style.visibility = 'hidden';
+                measureDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+                measureDiv.style.padding = '10px';
+                measureDiv.style.display = 'inline-block';
+                measureDiv.style.maxWidth = `${SVG_MAX_WIDTH}px`;
+                measureDiv.style.boxSizing = 'border-box';
+                measureDiv.innerHTML = htmlElement.innerHTML;
 
-                // For very short content, use narrower width
-                if (contentLength < 100) {
-                    dynamicWidth = Math.max(contentLength * 2, 100);
-                } else if (contentLength < 500) {
-                    dynamicWidth = 300;
-                } else {
-                    dynamicWidth = SVG_MAX_WIDTH;
-                }
+                // Add to DOM to get accurate measurements
+                document.body.appendChild(measureDiv);
 
-                // Cap at maximum allowed width
-                const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
+                // Get natural width based on content
+                let naturalWidth = Math.ceil(measureDiv.getBoundingClientRect().width);
+
+                // Remove measure element
+                document.body.removeChild(measureDiv);
+
+                // Set a minimum width and cap at maximum
+                const width = Math.max(Math.min(naturalWidth, SVG_MAX_WIDTH), 100);
 
                 // Apply styling to the container
                 Object.assign(conversionContainer.style, {
@@ -303,21 +334,28 @@ export const createConverters = (deps) => {
                 const conversionContainer = document.createElement('div');
                 conversionContainer.innerHTML = htmlElement.innerHTML;
 
-                // Determine content width dynamically based on content length
-                let dynamicWidth = 200;
-                const contentLength = htmlElement.innerHTML.length;
+                // Create a temporary div to measure the actual natural content width
+                const measureDiv = document.createElement('div');
+                measureDiv.style.position = 'absolute';
+                measureDiv.style.visibility = 'hidden';
+                measureDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+                measureDiv.style.padding = '10px';
+                measureDiv.style.display = 'inline-block';
+                measureDiv.style.maxWidth = `${SVG_MAX_WIDTH}px`;
+                measureDiv.style.boxSizing = 'border-box';
+                measureDiv.innerHTML = htmlElement.innerHTML;
 
-                // For very short content, use narrower width
-                if (contentLength < 100) {
-                    dynamicWidth = Math.max(contentLength * 2, 100);
-                } else if (contentLength < 500) {
-                    dynamicWidth = 300;
-                } else {
-                    dynamicWidth = SVG_MAX_WIDTH;
-                }
+                // Add to DOM to get accurate measurements
+                document.body.appendChild(measureDiv);
 
-                // Cap at maximum allowed width
-                const width = Math.min(dynamicWidth, SVG_MAX_WIDTH);
+                // Get natural width based on content
+                let naturalWidth = Math.ceil(measureDiv.getBoundingClientRect().width);
+
+                // Remove measure element
+                document.body.removeChild(measureDiv);
+
+                // Set a minimum width and cap at maximum
+                const width = Math.max(Math.min(naturalWidth, SVG_MAX_WIDTH), 100);
 
                 // Apply styling to the container
                 Object.assign(conversionContainer.style, {

@@ -54,29 +54,34 @@ document.addEventListener('DOMContentLoaded', () => {
         // Convert Markdown to HTML using our converter
         const cleanHtml = Converters.markdownToHtml(markdownInput.value);
 
-        // Update the preview with same styling that will be used for SVG conversion
+        // Create a temporary div to measure natural content width
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.visibility = 'hidden';
+        tempDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+        tempDiv.style.padding = '10px';
+        tempDiv.style.display = 'inline-block';
+        tempDiv.style.maxWidth = '400px'; // Max width constraint
+        tempDiv.style.boxSizing = 'border-box';
+        tempDiv.innerHTML = cleanHtml;
+
+        // Add to DOM to measure
+        document.body.appendChild(tempDiv);
+
+        // Get the natural width
+        let naturalWidth = Math.ceil(tempDiv.getBoundingClientRect().width);
+
+        // Remove temp element
+        document.body.removeChild(tempDiv);
+
+        // Set a minimum width and cap at maximum
+        const width = Math.max(Math.min(naturalWidth, 400), 100);
+
+        // Update the preview with styling
         htmlPreview.innerHTML = cleanHtml;
-
-        // Apply same width constraints that the converters use
-        let dynamicWidth = 200;
-        const contentLength = markdownInput.value.length;
-
-        // For very short content, use narrower width
-        if (contentLength < 100) {
-            dynamicWidth = Math.max(contentLength * 2, 100);
-        } else if (contentLength < 500) {
-            dynamicWidth = 300;
-        } else {
-            dynamicWidth = 400; // Use max width for longer content
-        }
-
-        // Cap at maximum allowed width
-        const width = Math.min(dynamicWidth, 400);
-
-        // Apply the width and styling to the HTML preview to match SVG generation
         htmlPreview.style.width = `${width}px`;
         htmlPreview.style.maxWidth = `${width}px`;
-        htmlPreview.style.padding = '10px'; // Same padding as in SVG container
+        htmlPreview.style.padding = '10px';
     }
 
     // Convert to SVG using selected method
