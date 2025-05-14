@@ -49,66 +49,77 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadButton.addEventListener('click', downloadSVG);
     copyButton.addEventListener('click', copySVG);
 
-    // Update HTML preview from Markdown
-    function updatePreview() {
-        // Convert Markdown to HTML using our converter
-        const cleanHtml = Converters.markdownToHtml(markdownInput.value);
-
-        // Create a temporary div to measure natural content width
-        const tempDiv = document.createElement('div');
-        tempDiv.style.position = 'absolute';
-        tempDiv.style.visibility = 'hidden';
-        tempDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
-        tempDiv.style.padding = '10px';
-        tempDiv.style.display = 'inline-block';
-        tempDiv.style.boxSizing = 'border-box';
+    /**
+     * Helper function to measure the natural content width without wrapping
+     * @param {string} htmlContent - HTML content to measure
+     * @param {string} fontFamily - Font family to use for measurement
+     * @returns {number} - The optimal width for the content
+     */
+    function measureNaturalContentWidth(htmlContent, fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif') {
+        // Create a temporary div to measure the natural content width
+        const measureDiv = document.createElement('div');
+        measureDiv.style.position = 'absolute';
+        measureDiv.style.visibility = 'hidden';
+        measureDiv.style.fontFamily = fontFamily;
+        measureDiv.style.padding = '10px';
+        measureDiv.style.display = 'inline-block';
+        measureDiv.style.boxSizing = 'border-box';
         // No maxWidth to allow measuring true content width
-        tempDiv.innerHTML = cleanHtml;
+        measureDiv.innerHTML = htmlContent;
 
-        // Add to DOM to measure
-        document.body.appendChild(tempDiv);
-
+        // Add to DOM to get accurate measurements
+        document.body.appendChild(measureDiv);
+        
         // Find the minimum width needed by measuring text without wrapping
         let maxLineWidth = 0;
-
+        
         // Process all block-level elements to find their natural widths
-        const blockElements = tempDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, table');
-
+        const blockElements = measureDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, table');
+        
         if (blockElements.length > 0) {
             // Measure each block element separately with nowrap to find max line width
             for (const element of blockElements) {
                 const clone = element.cloneNode(true);
                 const wrapper = document.createElement('div');
-
+                
                 wrapper.style.position = 'absolute';
                 wrapper.style.visibility = 'hidden';
                 wrapper.style.display = 'inline-block';
                 wrapper.style.whiteSpace = 'nowrap'; // No wrapping for accurate width
-
+                
                 wrapper.appendChild(clone);
                 document.body.appendChild(wrapper);
-
+                
                 // Get width of unwrapped content
                 const elementWidth = wrapper.getBoundingClientRect().width;
                 maxLineWidth = Math.max(maxLineWidth, elementWidth);
-
+                
                 document.body.removeChild(wrapper);
             }
         } else {
             // If no block elements, measure the entire content with nowrap
-            tempDiv.style.whiteSpace = 'nowrap';
-            maxLineWidth = tempDiv.getBoundingClientRect().width;
+            measureDiv.style.whiteSpace = 'nowrap';
+            maxLineWidth = measureDiv.getBoundingClientRect().width;
         }
-
+        
         // Add padding for better display
         maxLineWidth += 20;
 
-        // Remove temp element
-        document.body.removeChild(tempDiv);
+        // Remove measure element
+        document.body.removeChild(measureDiv);
 
-        // Set a minimum width and cap at maximum
-        const width = Math.max(Math.min(maxLineWidth, 400), 100);
+        // Set a minimum width and cap at maximum (400px for the HTML preview)
+        return Math.max(Math.min(maxLineWidth, 400), 100);
+    }
 
+    // Update HTML preview from Markdown
+    function updatePreview() {
+        // Convert Markdown to HTML using our converter
+        const cleanHtml = Converters.markdownToHtml(markdownInput.value);
+        
+        // Use helper function to get optimal content width
+        const width = measureNaturalContentWidth(cleanHtml);
+        
         // Update the preview with styling
         htmlPreview.innerHTML = cleanHtml;
         htmlPreview.style.width = `${width}px`;

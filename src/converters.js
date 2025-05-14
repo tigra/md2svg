@@ -16,6 +16,69 @@ const SVG_MAX_WIDTH = 400; // Maximum SVG width used across all methods
 export const createConverters = (deps) => {
     const { marked, DOMPurify, html2canvas, domToSvgModule } = deps;
 
+    /**
+     * Helper function to measure the natural content width without wrapping
+     * @param {string} htmlContent - HTML content to measure
+     * @param {string} fontFamily - Font family to use for measurement
+     * @returns {number} - The optimal width for the content
+     */
+    const measureNaturalContentWidth = (htmlContent, fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif') => {
+        // Create a temporary div to measure the natural content width
+        const measureDiv = document.createElement('div');
+        measureDiv.style.position = 'absolute';
+        measureDiv.style.visibility = 'hidden';
+        measureDiv.style.fontFamily = fontFamily;
+        measureDiv.style.padding = '10px';
+        measureDiv.style.display = 'inline-block';
+        measureDiv.style.boxSizing = 'border-box';
+        // No maxWidth to allow measuring true content width
+        measureDiv.innerHTML = htmlContent;
+
+        // Add to DOM to get accurate measurements
+        document.body.appendChild(measureDiv);
+        
+        // Find the minimum width needed by measuring text without wrapping
+        let maxLineWidth = 0;
+        
+        // Process all block-level elements to find their natural widths
+        const blockElements = measureDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, table');
+        
+        if (blockElements.length > 0) {
+            // Measure each block element separately with nowrap to find max line width
+            for (const element of blockElements) {
+                const clone = element.cloneNode(true);
+                const wrapper = document.createElement('div');
+                
+                wrapper.style.position = 'absolute';
+                wrapper.style.visibility = 'hidden';
+                wrapper.style.display = 'inline-block';
+                wrapper.style.whiteSpace = 'nowrap'; // No wrapping for accurate width
+                
+                wrapper.appendChild(clone);
+                document.body.appendChild(wrapper);
+                
+                // Get width of unwrapped content
+                const elementWidth = wrapper.getBoundingClientRect().width;
+                maxLineWidth = Math.max(maxLineWidth, elementWidth);
+                
+                document.body.removeChild(wrapper);
+            }
+        } else {
+            // If no block elements, measure the entire content with nowrap
+            measureDiv.style.whiteSpace = 'nowrap';
+            maxLineWidth = measureDiv.getBoundingClientRect().width;
+        }
+        
+        // Add padding for better display
+        maxLineWidth += 20;
+
+        // Remove measure element
+        document.body.removeChild(measureDiv);
+
+        // Set a minimum width and cap at maximum
+        return Math.max(Math.min(maxLineWidth, SVG_MAX_WIDTH), 100);
+    };
+
     return {
         /**
          * Converts Markdown to clean HTML
@@ -43,61 +106,10 @@ export const createConverters = (deps) => {
 
             // First convert markdown to HTML to measure natural width
             const htmlContent = this.markdownToHtml(markdownContent);
-
-            // Create a temporary div to measure the natural content width
-            const measureDiv = document.createElement('div');
-            measureDiv.style.position = 'absolute';
-            measureDiv.style.visibility = 'hidden';
-            measureDiv.style.fontFamily = 'Arial, Helvetica, sans-serif';
-            measureDiv.style.padding = '10px';
-            measureDiv.style.display = 'inline-block';
-            measureDiv.style.boxSizing = 'border-box';
-            // No maxWidth to allow measuring true content width
-            measureDiv.innerHTML = htmlContent;
-
-            // Add to DOM to get accurate measurements
-            document.body.appendChild(measureDiv);
-
-            // Find the minimum width needed by measuring text without wrapping
-            let maxLineWidth = 0;
-
-            // Process all block-level elements to find their natural widths
-            const blockElements = measureDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, table');
-
-            if (blockElements.length > 0) {
-                // Measure each block element separately with nowrap to find max line width
-                for (const element of blockElements) {
-                    const clone = element.cloneNode(true);
-                    const wrapper = document.createElement('div');
-
-                    wrapper.style.position = 'absolute';
-                    wrapper.style.visibility = 'hidden';
-                    wrapper.style.display = 'inline-block';
-                    wrapper.style.whiteSpace = 'nowrap'; // No wrapping for accurate width
-
-                    wrapper.appendChild(clone);
-                    document.body.appendChild(wrapper);
-
-                    // Get width of unwrapped content
-                    const elementWidth = wrapper.getBoundingClientRect().width;
-                    maxLineWidth = Math.max(maxLineWidth, elementWidth);
-
-                    document.body.removeChild(wrapper);
-                }
-            } else {
-                // If no block elements, measure the entire content with nowrap
-                measureDiv.style.whiteSpace = 'nowrap';
-                maxLineWidth = measureDiv.getBoundingClientRect().width;
-            }
-
-            // Add padding for better display
-            maxLineWidth += 20;
-
-            // Remove measure element
-            document.body.removeChild(measureDiv);
-
-            // Set a minimum width and cap at maximum
-            const width = Math.max(Math.min(maxLineWidth, SVG_MAX_WIDTH), 100);
+            
+            // Use helper function to get optimal content width
+            const width = measureNaturalContentWidth(htmlContent, 'Arial, Helvetica, sans-serif');
+            
             const height = 600; // Initial height, will be dynamically adjusted based on content
             const padding = 20;
             const lineHeight = 24;
@@ -212,60 +224,8 @@ export const createConverters = (deps) => {
          * @returns {string} - SVG markup as a string
          */
         htmlToForeignObjectSVG(htmlContent) {
-            // Create a temporary div to measure the actual natural content width
-            const measureDiv = document.createElement('div');
-            measureDiv.style.position = 'absolute';
-            measureDiv.style.visibility = 'hidden';
-            measureDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
-            measureDiv.style.padding = '10px';
-            measureDiv.style.display = 'inline-block';
-            measureDiv.style.boxSizing = 'border-box';
-            // No maxWidth to allow measuring true content width
-            measureDiv.innerHTML = htmlContent;
-
-            // Add to DOM to get accurate measurements
-            document.body.appendChild(measureDiv);
-
-            // Find the minimum width needed by measuring text without wrapping
-            let maxLineWidth = 0;
-
-            // Process all block-level elements to find their natural widths
-            const blockElements = measureDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, table');
-
-            if (blockElements.length > 0) {
-                // Measure each block element separately with nowrap to find max line width
-                for (const element of blockElements) {
-                    const clone = element.cloneNode(true);
-                    const wrapper = document.createElement('div');
-
-                    wrapper.style.position = 'absolute';
-                    wrapper.style.visibility = 'hidden';
-                    wrapper.style.display = 'inline-block';
-                    wrapper.style.whiteSpace = 'nowrap'; // No wrapping for accurate width
-
-                    wrapper.appendChild(clone);
-                    document.body.appendChild(wrapper);
-
-                    // Get width of unwrapped content
-                    const elementWidth = wrapper.getBoundingClientRect().width;
-                    maxLineWidth = Math.max(maxLineWidth, elementWidth);
-
-                    document.body.removeChild(wrapper);
-                }
-            } else {
-                // If no block elements, measure the entire content with nowrap
-                measureDiv.style.whiteSpace = 'nowrap';
-                maxLineWidth = measureDiv.getBoundingClientRect().width;
-            }
-
-            // Add padding for better display
-            maxLineWidth += 20;
-
-            // Remove measure element
-            document.body.removeChild(measureDiv);
-
-            // Set a minimum width and cap at maximum
-            const width = Math.max(Math.min(maxLineWidth, SVG_MAX_WIDTH), 100);
+            // Use helper function to get optimal content width
+            const width = measureNaturalContentWidth(htmlContent);
 
             // Create a temporary div with exact styling to measure the content height
             const tempDiv = document.createElement('div');
@@ -313,60 +273,8 @@ export const createConverters = (deps) => {
                 const conversionContainer = document.createElement('div');
                 conversionContainer.innerHTML = htmlElement.innerHTML;
 
-                // Create a temporary div to measure the actual natural content width
-                const measureDiv = document.createElement('div');
-                measureDiv.style.position = 'absolute';
-                measureDiv.style.visibility = 'hidden';
-                measureDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
-                measureDiv.style.padding = '10px';
-                measureDiv.style.display = 'inline-block';
-                measureDiv.style.boxSizing = 'border-box';
-                // No maxWidth to allow measuring true content width
-                measureDiv.innerHTML = htmlElement.innerHTML;
-
-                // Add to DOM to get accurate measurements
-                document.body.appendChild(measureDiv);
-
-                // Find the minimum width needed by measuring text without wrapping
-                let maxLineWidth = 0;
-
-                // Process all block-level elements to find their natural widths
-                const blockElements = measureDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, table');
-
-                if (blockElements.length > 0) {
-                    // Measure each block element separately with nowrap to find max line width
-                    for (const element of blockElements) {
-                        const clone = element.cloneNode(true);
-                        const wrapper = document.createElement('div');
-
-                        wrapper.style.position = 'absolute';
-                        wrapper.style.visibility = 'hidden';
-                        wrapper.style.display = 'inline-block';
-                        wrapper.style.whiteSpace = 'nowrap'; // No wrapping for accurate width
-
-                        wrapper.appendChild(clone);
-                        document.body.appendChild(wrapper);
-
-                        // Get width of unwrapped content
-                        const elementWidth = wrapper.getBoundingClientRect().width;
-                        maxLineWidth = Math.max(maxLineWidth, elementWidth);
-
-                        document.body.removeChild(wrapper);
-                    }
-                } else {
-                    // If no block elements, measure the entire content with nowrap
-                    measureDiv.style.whiteSpace = 'nowrap';
-                    maxLineWidth = measureDiv.getBoundingClientRect().width;
-                }
-
-                // Add padding for better display
-                maxLineWidth += 20;
-
-                // Remove measure element
-                document.body.removeChild(measureDiv);
-
-                // Set a minimum width and cap at maximum
-                const width = Math.max(Math.min(maxLineWidth, SVG_MAX_WIDTH), 100);
+                // Use helper function to get optimal content width
+                const width = measureNaturalContentWidth(htmlElement.innerHTML);
 
                 // Apply styling to the container
                 Object.assign(conversionContainer.style, {
@@ -430,60 +338,8 @@ export const createConverters = (deps) => {
                 const conversionContainer = document.createElement('div');
                 conversionContainer.innerHTML = htmlElement.innerHTML;
 
-                // Create a temporary div to measure the actual natural content width
-                const measureDiv = document.createElement('div');
-                measureDiv.style.position = 'absolute';
-                measureDiv.style.visibility = 'hidden';
-                measureDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
-                measureDiv.style.padding = '10px';
-                measureDiv.style.display = 'inline-block';
-                measureDiv.style.boxSizing = 'border-box'
-                // No maxWidth to allow measuring true content width
-                measureDiv.innerHTML = htmlElement.innerHTML;
-
-                // Add to DOM to get accurate measurements
-                document.body.appendChild(measureDiv);
-
-                // Find the minimum width needed by measuring text without wrapping
-                let maxLineWidth = 0;
-
-                // Process all block-level elements to find their natural widths
-                const blockElements = measureDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, table');
-
-                if (blockElements.length > 0) {
-                    // Measure each block element separately with nowrap to find max line width
-                    for (const element of blockElements) {
-                        const clone = element.cloneNode(true);
-                        const wrapper = document.createElement('div');
-
-                        wrapper.style.position = 'absolute';
-                        wrapper.style.visibility = 'hidden';
-                        wrapper.style.display = 'inline-block';
-                        wrapper.style.whiteSpace = 'nowrap'; // No wrapping for accurate width
-
-                        wrapper.appendChild(clone);
-                        document.body.appendChild(wrapper);
-
-                        // Get width of unwrapped content
-                        const elementWidth = wrapper.getBoundingClientRect().width;
-                        maxLineWidth = Math.max(maxLineWidth, elementWidth);
-
-                        document.body.removeChild(wrapper);
-                    }
-                } else {
-                    // If no block elements, measure the entire content with nowrap
-                    measureDiv.style.whiteSpace = 'nowrap';
-                    maxLineWidth = measureDiv.getBoundingClientRect().width;
-                }
-
-                // Add padding for better display
-                maxLineWidth += 20;
-
-                // Remove measure element
-                document.body.removeChild(measureDiv);
-
-                // Set a minimum width and cap at maximum
-                const width = Math.max(Math.min(maxLineWidth, SVG_MAX_WIDTH), 40);
+                // Use helper function to get optimal content width with a minimum width of 40px 
+                const width = Math.max(Math.min(measureNaturalContentWidth(htmlElement.innerHTML), SVG_MAX_WIDTH), 40);
 
                 // Apply styling to the container
                 Object.assign(conversionContainer.style, {
