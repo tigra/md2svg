@@ -61,21 +61,53 @@ document.addEventListener('DOMContentLoaded', () => {
         tempDiv.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
         tempDiv.style.padding = '10px';
         tempDiv.style.display = 'inline-block';
-        tempDiv.style.maxWidth = '400px'; // Max width constraint
         tempDiv.style.boxSizing = 'border-box';
+        // No maxWidth to allow measuring true content width
         tempDiv.innerHTML = cleanHtml;
 
         // Add to DOM to measure
         document.body.appendChild(tempDiv);
 
-        // Get the natural width
-        let naturalWidth = Math.ceil(tempDiv.getBoundingClientRect().width);
+        // Find the minimum width needed by measuring text without wrapping
+        let maxLineWidth = 0;
+
+        // Process all block-level elements to find their natural widths
+        const blockElements = tempDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, table');
+
+        if (blockElements.length > 0) {
+            // Measure each block element separately with nowrap to find max line width
+            for (const element of blockElements) {
+                const clone = element.cloneNode(true);
+                const wrapper = document.createElement('div');
+
+                wrapper.style.position = 'absolute';
+                wrapper.style.visibility = 'hidden';
+                wrapper.style.display = 'inline-block';
+                wrapper.style.whiteSpace = 'nowrap'; // No wrapping for accurate width
+
+                wrapper.appendChild(clone);
+                document.body.appendChild(wrapper);
+
+                // Get width of unwrapped content
+                const elementWidth = wrapper.getBoundingClientRect().width;
+                maxLineWidth = Math.max(maxLineWidth, elementWidth);
+
+                document.body.removeChild(wrapper);
+            }
+        } else {
+            // If no block elements, measure the entire content with nowrap
+            tempDiv.style.whiteSpace = 'nowrap';
+            maxLineWidth = tempDiv.getBoundingClientRect().width;
+        }
+
+        // Add padding for better display
+        maxLineWidth += 20;
 
         // Remove temp element
         document.body.removeChild(tempDiv);
 
         // Set a minimum width and cap at maximum
-        const width = Math.max(Math.min(naturalWidth, 400), 100);
+        const width = Math.max(Math.min(maxLineWidth, 400), 100);
 
         // Update the preview with styling
         htmlPreview.innerHTML = cleanHtml;
