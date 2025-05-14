@@ -111,6 +111,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // Display the SVG
             svgContainer.innerHTML = svgString;
 
+            // Adjust container size to match SVG dimensions
+            const svgElement = svgContainer.querySelector('svg');
+            if (svgElement) {
+                // Use the SVG's actual width to size the container exactly
+                const svgWidth = svgElement.getAttribute('width');
+                if (svgWidth) {
+                    // Make the container the exact same width as the SVG
+                    svgContainer.style.width = svgWidth + 'px';
+                }
+            }
+
             // Add the SVG code to the textarea
             svgCode.value = svgString;
 

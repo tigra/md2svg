@@ -541,11 +541,11 @@ main {
     background-color: white;
     border: 1px dashed #ccc;
     border-radius: 4px;
-    padding: 10px;
+    padding: 0; /* Remove padding to match SVG exactly */
     overflow: visible;
     box-sizing: border-box;
     max-width: 400px;
-    width: auto; /* Changed to auto for dynamic width */
+    width: auto; /* Width will adjust to SVG content */
     margin: 0; /* Remove centering */
 }
 
